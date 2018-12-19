@@ -1,0 +1,28 @@
+---
+- name: Download tower bundle installer
+  get_url:
+    url: https://releases.ansible.com/ansible-tower/setup-bundle/ansible-tower-setup-bundle-latest.el7.tar.gz
+    dest: /tmp/ansible-tower.tgz
+
+- name: Extract bundle installer
+  unarchive:
+    src: /tmp/ansible-tower.tgz
+    dest: /tmp
+    remote_src: yes
+
+- name: Retrive tower installer dir name
+  shell: ls /tmp | grep --color=never ansible-tower-setup-bundle-*
+  register: ret
+
+- name: Put inventory file
+  template:
+    src: inventory.j2
+    dest: /tmp/{{ ret.stdout }}/inventory
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Run installer ( take 10-15 min )
+  command: ./setup.sh
+  args:
+    chdir: /tmp/{{ ret.stdout }}

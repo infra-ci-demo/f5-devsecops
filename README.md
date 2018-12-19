@@ -44,3 +44,23 @@ ansible-playbook -i inv_gitlab.yml start_gitlab.yml
 1. パイプラインが正常終了すればセットアップは成功
 
 
+## Tower 環境の構築
+
+```
+vim inv_tower.yml
+```
+
+以下を必要に応じて編集
+```
+  ansible_host: 10.208.81.222       ← GitLabを起動するサーバーのIPアドレス
+  ansible_user: centos              ← sudo 可能なユーザー（もしくはroot）
+  ansible_ssh_pass: redhat          ← 接続パスワード。鍵認証を使う場合は行ごと削除する
+  tower_password: password          ← Towerの管理者パスワード(複雑なものへ変更する)
+```
+
+セットアップを実行（5～15分程度）
+```
+ansible-playbook -i inv_tower.yml start_tower.yml
+```
+
+終了したらブラウザで`http://{{ ansible_host }}` へアクセスし、`root/設定したパスワード`でログインし、ライセンスを設定する（ライセンスの取得は別途行う）。

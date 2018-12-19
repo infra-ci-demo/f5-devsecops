@@ -1,0 +1,7 @@
+---
+- name: Set up Tower
+  hosts: all
+  become: yes
+  tasks:
+    - import_role:
+        name: tower_install
