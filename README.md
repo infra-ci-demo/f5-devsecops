@@ -32,7 +32,7 @@ vim inv_gitlab.yml
 
 セットアップを実行（5～15分程度）
 ```
-ansible-playbook -i inv_gitlab.yml gitlab-on-docker.yml
+ansible-playbook -i inv_gitlab.yml start_gitlab.yml
 ```
 
 終了したらブラウザで`http://{{ ansible_host }}:8080` へアクセスし、`root/設定したパスワード`でログインする。
