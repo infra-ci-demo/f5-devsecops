@@ -75,7 +75,7 @@
     gitlab-runner register
     --non-interactive
     --url http://{{ ansible_host }}:8080
-    --registration-token {{ gitlab_runner_token | default("token-AABBCC") }}
+    --registration-token {{ gitlab_runner_token }}
     --tag-list docker
     --executor docker
     --locked=false

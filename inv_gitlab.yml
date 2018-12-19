@@ -4,5 +4,7 @@ gitlab:
       ansible_host: 10.208.81.221
       ansible_user: centos
       ansible_ssh_pass: redhat
+      gitlab_root_password: password
+      gitlab_runner_token: token-AABBCC
       gitlab_ce_version: gitlab/gitlab-ce:11.5.4-ce.0
       gitlab_runner_version: gitlab/gitlab-runner:v11.5.1
