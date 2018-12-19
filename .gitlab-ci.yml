@@ -1,0 +1,18 @@
+---
+stages:
+  - sample1
+  - sample2
+
+Sample_Job1:
+  stage: sample1
+  script:
+    - echo hello1
+  tags:
+    - docker
+
+Sample_Job2:
+  stage: sample2
+  script:
+    - echo hello2
+  tags:
+    - docker

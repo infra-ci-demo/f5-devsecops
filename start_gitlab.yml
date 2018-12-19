@@ -1,0 +1,7 @@
+---
+- name: Set up gitlab with docker
+  hosts: all
+  become: yes
+  tasks:
+    - import_role:
+        name: gitlab_on_docker

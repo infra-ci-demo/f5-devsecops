@@ -1,0 +1,92 @@
+---
+- name: Install dependency packages
+  yum:
+    name: "{{ item }}"
+  loop:
+    - yum-utils
+    - device-mapper-persistent-data
+    - lvm2
+    - python-docker-py
+
+- name: Set docker official yum repository
+  yum_repository:
+    name: docker-ce
+    description: docker official repository
+    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+    gpgcheck: yes
+    enabled: yes
+
+- name: Get rpm key
+  rpm_key:
+    key: https://download.docker.com/linux/centos/gpg
+
+- name: Install docker-ce
+  yum:
+    name: docker-ce
+
+- name: Enable & start docker
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Put gitlab config
+  template:
+    src: gitlab.rb.j2
+    dest: /root/gitlab.rb
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create gitlab-ce container
+  docker_container:
+    name: gitlab
+    image: "{{ gitlab_ce_version }}"
+    state: started
+    restart_policy: always
+    ports:
+     - "8080:80"
+    volumes:
+     - /root/gitlab.rb:/etc/gitlab/gitlab.rb
+
+- name: Create gitlab-runner container
+  docker_container:
+    name: gitlab-runner
+    image: "{{ gitlab_runner_version }}"
+    state: started
+    restart_policy: always
+    volumes:
+     - /var/run/docker.sock:/var/run/docker.sock
+
+- name: Wait for initialize gitlab
+  uri:
+    url: http://{{ ansible_host }}:8080/
+    return_content: yes
+  register: ret
+  until:
+    - '"Username" in ret.content'
+    - '"Password" in ret.content'
+  retries: 60
+  delay: 5
+
+- name: Register runner to gitlab
+  shell: >-
+    docker exec gitlab-runner
+    gitlab-runner register
+    --non-interactive
+    --url http://{{ ansible_host }}:8080
+    --registration-token {{ gitlab_runner_token | default("token-AABBCC") }}
+    --tag-list docker
+    --executor docker
+    --locked=false
+    --docker-image centos:latest
+    --clone-url http://{{ ansible_host }}:8080/
+    --docker-volumes /var/run/docker.sock:/var/run/docker.sock
+    --docker-privileged=true
+  register: ret
+
+- name: Check runner registration
+  assert:
+    that:
+      - '"Registering runner... succeeded" in ret.stderr'
+    msg: Runnner registration failed
